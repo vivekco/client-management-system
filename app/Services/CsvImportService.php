@@ -7,6 +7,7 @@ use App\Models\DuplicateGroup;
 use App\Models\ImportLog;
 use Illuminate\Support\Facades\Validator;
 use Illuminate\Support\Facades\DB;
+use App\Models\ImportSummary;
 
 class CsvImportService
 {
@@ -19,7 +20,7 @@ class CsvImportService
             return [
                 'status' => 'error',
                 'message' => 'Unable to open file',
-                'processed' => 0,
+                'total_rows' => 0,
                 'inserted' => 0,
                 'skipped' => 0,
                 'duplicates' => 0
@@ -31,7 +32,7 @@ class CsvImportService
         $rowNumber = 1;
 
         $stats = [
-            'processed' => 0,
+            'total_rows' => 0,
             'inserted' => 0,
             'skipped' => 0,
             'duplicates' => 0
@@ -42,7 +43,7 @@ class CsvImportService
 
         while (($row = fgetcsv($handle)) !== false) {
             $rowNumber++;
-            $stats['processed']++;
+            $stats['total_rows']++;
 
             $company = $row[0] ?? null;
             $email = $row[1] ?? null;
@@ -122,7 +123,7 @@ class CsvImportService
             ImportLog::create($log);
         }
 
-        return array_merge(['status' => 'success'], $stats);
+        return  $stats;
     }
 
     protected function insertBatch(array $batch)

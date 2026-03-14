@@ -9,6 +9,7 @@ use Illuminate\Queue\InteractsWithQueue;
 use Illuminate\Queue\SerializesModels;
 use App\Services\CsvImportService;
 use App\Services\DuplicateDetectionService;
+use Illuminate\Support\Facades\Log;
 
 class ImportClientsJob implements ShouldQueue
 {
@@ -32,6 +33,16 @@ class ImportClientsJob implements ShouldQueue
     ) {
         $path = storage_path('app/' . $this->path);
 
-        $importService->processFile($path, $duplicateService);
+        $stats = $importService->processFile($path, $duplicateService);
+
+        \App\Models\ImportSummary::updateOrCreate(
+            ['file_name' => basename($path)],
+            [
+                'total_rows' => $stats['total_rows'] ?? 0,
+                'inserted'   => $stats['inserted'] ?? 0,
+                'skipped'    => $stats['skipped'] ?? 0,
+                'duplicates' => $stats['duplicates'] ?? 0,
+            ]
+        );
     }
 }
