@@ -3,21 +3,30 @@
 namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
+use App\Services\ImportService;
 use Illuminate\Http\Request;
-use App\Http\Requests\ImportCsvRequest;
-use App\Jobs\ImportClientsJob;
 
 class ImportController extends Controller
 {
-    public function import(ImportCsvRequest $request)
+    protected ImportService $importService;
+
+    public function __construct(ImportService $importService)
     {
-        $path = $request->file('file')->store('imports');
+        $this->importService = $importService;
+    }
 
-        ImportClientsJob::dispatch($path);
+    public function import(Request $request)
+    {
+        return $this->importService->import($request);
+    }
 
-        return response()->json([
-            'status' => 'success',
-            'message' => 'CSV import started'
-        ]);
+    public function summaries(Request $request)
+    {
+        return $this->importService->summaries($request);
+    }
+
+    public function logs(Request $request)
+    {
+        return $this->importService->logs($request);
     }
 }

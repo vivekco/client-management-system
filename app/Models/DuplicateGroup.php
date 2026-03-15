@@ -13,6 +13,6 @@ class DuplicateGroup extends Model
 
     public function clients()
     {
-        return $this->hasMany(Client::class);
+        return $this->hasMany(Client::class, 'duplicate_group_id');
     }
 }

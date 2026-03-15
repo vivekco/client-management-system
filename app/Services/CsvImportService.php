@@ -5,9 +5,10 @@ namespace App\Services;
 use App\Models\Client;
 use App\Models\DuplicateGroup;
 use App\Models\ImportLog;
+use App\Models\ImportSummary;
 use Illuminate\Support\Facades\Validator;
 use Illuminate\Support\Facades\DB;
-use App\Models\ImportSummary;
+use Illuminate\Support\Facades\Log;
 
 class CsvImportService
 {
@@ -16,6 +17,7 @@ class CsvImportService
     public function processFile($path, $duplicateService)
     {
         $handle = fopen($path, 'r');
+
         if (!$handle) {
             return [
                 'status' => 'error',
@@ -23,41 +25,51 @@ class CsvImportService
                 'total_rows' => 0,
                 'inserted' => 0,
                 'skipped' => 0,
-                'duplicates' => 0
+                'duplicates' => 0,
             ];
         }
 
         $fileName = basename($path);
-        $header = fgetcsv($handle); // skip header
+        fgetcsv($handle); // skip header
         $rowNumber = 1;
 
         $stats = [
             'total_rows' => 0,
             'inserted' => 0,
             'skipped' => 0,
-            'duplicates' => 0
+            'duplicates' => 0,
         ];
 
         $batch = [];
         $logs = [];
 
+        /*
+        $seenSignatures structure:
+        [
+            'signature' => [
+                'seen_once' => true,
+                'group_id' => null|int
+            ]
+        ]
+        */
+        $seenSignatures = [];
+
         while (($row = fgetcsv($handle)) !== false) {
             $rowNumber++;
             $stats['total_rows']++;
 
-            $company = $row[0] ?? null;
-            $email = $row[1] ?? null;
-            $phone = $row[2] ?? null;
+            $company = trim($row[0] ?? '');
+            $email   = strtolower(trim($row[1] ?? ''));
+            $phone   = preg_replace('/\D+/', '', $row[2] ?? '');
 
-            // Validate row
             $validator = Validator::make([
                 'company_name' => $company,
                 'email' => $email,
-                'phone_number' => $phone
+                'phone_number' => $phone,
             ], [
                 'company_name' => 'required|string|max:255',
                 'email' => 'required|email',
-                'phone_number' => 'required|digits:10'
+                'phone_number' => 'required|digits:10',
             ]);
 
             if ($validator->fails()) {
@@ -67,32 +79,89 @@ class CsvImportService
                     'data' => [
                         'company_name' => $company,
                         'email' => $email,
-                        'phone_number' => $phone
+                        'phone_number' => $phone,
                     ],
-                    'errors' => $validator->errors()->all()
+                    'errors' => $validator->errors()->all(),
                 ];
+
                 $stats['skipped']++;
                 continue;
             }
 
-            // Duplicate detection
             $signature = $duplicateService->generateSignature($company, $email, $phone);
-            $existing = Client::where('signature', $signature)->first();
-
             $duplicateGroupId = null;
 
-            if ($existing) {
-                $duplicateGroupId = $existing->duplicate_group_id;
+            /*
+             |------------------------------------------------------------
+             | STEP 1: Check if already seen in the SAME CSV import
+             |------------------------------------------------------------
+             | First CSV occurrence stays unique.
+             | Second and later become duplicate.
+             */
+            if (array_key_exists($signature, $seenSignatures)) {
+                if (!empty($seenSignatures[$signature]['group_id'])) {
+                    $duplicateGroupId = $seenSignatures[$signature]['group_id'];
+                } else {
+                    $group = DuplicateGroup::create([
+                        'signature' => $signature,
+                    ]);
 
-                if (!$duplicateGroupId) {
-                    $group = DuplicateGroup::create(['signature' => $signature]);
-                    $existing->update(['duplicate_group_id' => $group->id]);
                     $duplicateGroupId = $group->id;
+                    $seenSignatures[$signature]['group_id'] = $duplicateGroupId;
                 }
+
                 $stats['duplicates']++;
+            } else {
+                /*
+                 |--------------------------------------------------------
+                 | STEP 2: Not yet seen in current CSV.
+                 | Check database.
+                 |--------------------------------------------------------
+                 */
+
+                // First check if any duplicate group already exists for this signature
+                $existingGrouped = Client::where('signature', $signature)
+                    ->whereNotNull('duplicate_group_id')
+                    ->first();
+
+                if ($existingGrouped) {
+                    // Current row is duplicate of existing grouped records
+                    $duplicateGroupId = $existingGrouped->duplicate_group_id;
+                    $stats['duplicates']++;
+
+                    $seenSignatures[$signature] = [
+                        'seen_once' => true,
+                        'group_id' => $duplicateGroupId,
+                    ];
+                } else {
+                    // Check if an original unique record already exists in DB
+                    $existingOriginal = Client::where('signature', $signature)
+                        ->whereNull('duplicate_group_id')
+                        ->first();
+
+                    if ($existingOriginal) {
+                        // Current row is the second occurrence overall
+                        $group = DuplicateGroup::create([
+                            'signature' => $signature,
+                        ]);
+
+                        $duplicateGroupId = $group->id;
+                        $stats['duplicates']++;
+
+                        $seenSignatures[$signature] = [
+                            'seen_once' => true,
+                            'group_id' => $duplicateGroupId,
+                        ];
+                    } else {
+                        // Truly first occurrence ever
+                        $seenSignatures[$signature] = [
+                            'seen_once' => true,
+                            'group_id' => null,
+                        ];
+                    }
+                }
             }
 
-            // Prepare row for batch insert
             $batch[] = [
                 'company_name' => $company,
                 'email' => $email,
@@ -100,7 +169,7 @@ class CsvImportService
                 'signature' => $signature,
                 'duplicate_group_id' => $duplicateGroupId,
                 'created_at' => now(),
-                'updated_at' => now()
+                'updated_at' => now(),
             ];
 
             if (count($batch) >= $this->batchSize) {
@@ -110,7 +179,6 @@ class CsvImportService
             }
         }
 
-        // Insert remaining batch
         if (!empty($batch)) {
             $this->insertBatch($batch);
             $stats['inserted'] += count($batch);
@@ -118,12 +186,21 @@ class CsvImportService
 
         fclose($handle);
 
-        // Save import logs
         foreach ($logs as $log) {
             ImportLog::create($log);
         }
 
-        return  $stats;
+        ImportSummary::updateOrCreate(
+            ['file_name' => $fileName],
+            [
+                'total_rows' => $stats['total_rows'],
+                'inserted' => $stats['inserted'],
+                'skipped' => $stats['skipped'],
+                'duplicates' => $stats['duplicates'],
+            ]
+        );
+
+        return array_merge(['status' => 'success'], $stats);
     }
 
     protected function insertBatch(array $batch)

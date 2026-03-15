@@ -8,7 +8,7 @@ use Illuminate\Foundation\Bus\Dispatchable;
 use Illuminate\Queue\InteractsWithQueue;
 use Illuminate\Queue\SerializesModels;
 use App\Services\CsvImportService;
-use App\Services\DuplicateDetectionService;
+use App\Services\DuplicateService;
 use Illuminate\Support\Facades\Log;
 
 class ImportClientsJob implements ShouldQueue
@@ -29,7 +29,7 @@ class ImportClientsJob implements ShouldQueue
      */
     public function handle(
         CsvImportService $importService,
-        DuplicateDetectionService $duplicateService
+        DuplicateService $duplicateService
     ) {
         $path = storage_path('app/' . $this->path);
 

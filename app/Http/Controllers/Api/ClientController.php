@@ -4,28 +4,24 @@ namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
-use App\Models\Client;
+use App\Services\ClientService;
 
 class ClientController extends Controller
 {
-    public function index(Request $request)
-{
-    $query = Client::query();
+    protected ClientService $clientService;
 
-    // Filter duplicates
-    if ($request->boolean('duplicates')) {
-        $query->whereNotNull('duplicate_group_id');
-    } 
-    // Filter unique records
-    elseif ($request->boolean('unique')) {
-        $query->whereNull('duplicate_group_id');
+    public function __construct(ClientService $clientService)
+    {
+        $this->clientService = $clientService;
     }
 
-    // Pagination size (default 20)
-    $perPage = $request->get('per_page', 20);
+    public function index(Request $request)
+    {
+        return $this->clientService->index($request);
+    }
 
-    return response()->json(
-        $query->paginate($perPage)
-    );
-}
+    public function export(Request $request)
+    {
+        return $this->clientService->export($request);
+    }
 }
