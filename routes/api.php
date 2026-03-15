@@ -5,7 +5,6 @@ use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\Api\ImportController;
 use App\Http\Controllers\Api\ClientController;
 use App\Http\Controllers\Api\DuplicateController;
-use App\Http\Controllers\Api\ExportController;
 
 /*
 |--------------------------------------------------------------------------
@@ -22,11 +21,12 @@ Route::middleware('auth:sanctum')->get('/user', function (Request $request) {
     return $request->user();
 });
 
-Route::post('/clients/import', [ImportController::class, 'import']);
-
 Route::get('/clients', [ClientController::class, 'index']);
+Route::post('/clients/import', [ImportController::class, 'import']);
+Route::get('/clients/export', [ClientController::class, 'export']);
 
-Route::get('/duplicates', [DuplicateController::class, 'index']);
-Route::get('/duplicates/{id}', [DuplicateController::class, 'show']);
+Route::get('/duplicate-groups', [DuplicateController::class, 'index']);
+Route::get('/duplicate-groups/{id}', [DuplicateController::class, 'show']);
 
-Route::get('/clients/export', [ExportController::class, 'export']);
+Route::get('/imports/logs', [ImportController::class, 'logs']);
+Route::get('/imports/summaries', [ImportController::class, 'summaries']);

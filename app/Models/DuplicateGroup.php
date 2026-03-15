@@ -7,12 +7,14 @@ use Illuminate\Database\Eloquent\Model;
 
 class DuplicateGroup extends Model
 {
+    use HasFactory;
+
     protected $fillable = [
         'signature'
     ];
 
     public function clients()
     {
-        return $this->hasMany(Client::class);
+        return $this->hasMany(Client::class, 'duplicate_group_id');
     }
 }
