@@ -39,12 +39,13 @@ class DuplicateService
             'clients' => $clients,
         ]);
     }
+    
     public function generateSignature($company, $email, $phone)
     {
         return md5(
             strtolower(trim($company)) .
                 strtolower(trim($email)) .
-                trim($phone)
+                preg_replace('/\D+/', '', $phone)
         );
     }
 }

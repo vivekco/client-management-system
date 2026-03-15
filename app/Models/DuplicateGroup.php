@@ -7,6 +7,8 @@ use Illuminate\Database\Eloquent\Model;
 
 class DuplicateGroup extends Model
 {
+    use HasFactory;
+
     protected $fillable = [
         'signature'
     ];
