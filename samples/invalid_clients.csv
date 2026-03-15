@@ -1,0 +1,6 @@
+company_name,email,phone_number
+ABC Pvt Ltd,invalid-email,9801234567
+,missingcompany@example.com,9801234568
+XYZ Traders,xyz@example.com,12345
+Tech Solutions,,9801234570
+Global Ventures,global@example.com,
