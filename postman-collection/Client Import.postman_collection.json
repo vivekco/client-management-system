@@ -1,0 +1,307 @@
+{
+  "info": {
+    "_postman_id": "406e50d5-e84a-4ffa-b12d-3e0ec26f453d",
+    "name": "Client Import",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+    "_exporter_id": "14070377"
+  },
+  "item": [
+    {
+      "name": "Import",
+      "item": [
+        {
+          "name": "Import Clients",
+          "request": {
+            "method": "POST",
+            "header": [],
+            "body": {
+              "mode": "formdata",
+              "formdata": [
+                {
+                  "key": "file",
+                  "type": "file",
+                  "uuid": "7ee7297a-8465-41dd-8db7-f9cfb81031ac",
+                  "src": "/Users/viveknepa/Downloads/sample_clients_large.csv"
+                }
+              ]
+            },
+            "url": {
+              "raw": "localhost:8000/api/clients/import",
+              "host": [
+                "localhost"
+              ],
+              "port": "8000",
+              "path": [
+                "api",
+                "clients",
+                "import"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Import Summaries",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "localhost:8000/api/imports/summaries",
+              "host": [
+                "localhost"
+              ],
+              "port": "8000",
+              "path": [
+                "api",
+                "imports",
+                "summaries"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Import Error Logs",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "localhost:8000/api/imports/logs",
+              "host": [
+                "localhost"
+              ],
+              "port": "8000",
+              "path": [
+                "api",
+                "imports",
+                "logs"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Specific File Error Logs",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "localhost:8000/api/imports/logs?file_name=ekbGWLDAUEQHFIq8VjYMbhQIfQB86RI9iuwe2Ebt.csv",
+              "host": [
+                "localhost"
+              ],
+              "port": "8000",
+              "path": [
+                "api",
+                "imports",
+                "logs"
+              ],
+              "query": [
+                {
+                  "key": "file_name",
+                  "value": "ekbGWLDAUEQHFIq8VjYMbhQIfQB86RI9iuwe2Ebt.csv"
+                }
+              ]
+            }
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "Clients",
+      "item": [
+        {
+          "name": "Clients - List All",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "localhost:8000/api/clients",
+              "host": [
+                "localhost"
+              ],
+              "port": "8000",
+              "path": [
+                "api",
+                "clients"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Clients - List Unique",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "localhost:8000/api/clients?unique=true",
+              "host": [
+                "localhost"
+              ],
+              "port": "8000",
+              "path": [
+                "api",
+                "clients"
+              ],
+              "query": [
+                {
+                  "key": "unique",
+                  "value": "true"
+                }
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Clients - List Duplicates",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "localhost:8000/api/clients?duplicate=true",
+              "host": [
+                "localhost"
+              ],
+              "port": "8000",
+              "path": [
+                "api",
+                "clients"
+              ],
+              "query": [
+                {
+                  "key": "duplicate",
+                  "value": "true"
+                }
+              ]
+            }
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "Export",
+      "item": [
+        {
+          "name": "Export - All clients",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "localhost:8000/api/clients/export",
+              "host": [
+                "localhost"
+              ],
+              "port": "8000",
+              "path": [
+                "api",
+                "clients",
+                "export"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Export - Unique Clients",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "localhost:8000/api/clients/export?unique=true",
+              "host": [
+                "localhost"
+              ],
+              "port": "8000",
+              "path": [
+                "api",
+                "clients",
+                "export"
+              ],
+              "query": [
+                {
+                  "key": "unique",
+                  "value": "true"
+                }
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Export - Duplicate Clients",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "localhost:8000/api/clients/export?duplicates=true",
+              "host": [
+                "localhost"
+              ],
+              "port": "8000",
+              "path": [
+                "api",
+                "clients",
+                "export"
+              ],
+              "query": [
+                {
+                  "key": "duplicates",
+                  "value": "true"
+                }
+              ]
+            }
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "Duplicates",
+      "item": [
+        {
+          "name": "Duplicate Groups",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "localhost:8000/api/duplicate-groups",
+              "host": [
+                "localhost"
+              ],
+              "port": "8000",
+              "path": [
+                "api",
+                "duplicate-groups"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Clients in Duplicate Groups",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "localhost:8000/api/duplicate-groups/13",
+              "host": [
+                "localhost"
+              ],
+              "port": "8000",
+              "path": [
+                "api",
+                "duplicate-groups",
+                "13"
+              ]
+            }
+          },
+          "response": []
+        }
+      ]
+    }
+  ]
+}
