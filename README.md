@@ -85,7 +85,7 @@ Exports use streamed CSV responses to support large datasets.
 
 Make sure the following are installed:
 
-- PHP 8.1+
+- PHP 8+
 - Composer
 - MySQL
 - Git
@@ -96,7 +96,7 @@ Make sure the following are installed:
 
 ## Clone Repository
 
-git clone <repository-url>
+git clone https://github.com/vivekco/client-management-system.git
 cd client-manager
 
 ## Install Dependencies
@@ -257,6 +257,7 @@ ImportClientsJob
 # Database Tables
 
 Clients
+- id
 - company_name
 - email
 - phone_number
@@ -268,12 +269,14 @@ DuplicateGroups
 - signature
 
 ImportLogs
+- id
 - file_name
 - row_number
 - data
 - errors
 
 ImportSummaries
+- id
 - file_name
 - total_rows
 - inserted
@@ -283,7 +286,26 @@ ImportSummaries
 ---
 
 # Postman Collection Link
-https://web.postman.co/workspace/My-Workspace~9e3c7570-ee24-4b25-87bc-75e53039784b/collection/14070377-406e50d5-e84a-4ffa-b12d-3e0ec26f453d?action=share&source=copy-link&creator=14070377
+
+The Postman collection for testing the API endpoints is included in the repository.
+Location:
+postman-collection/
+
+Import the provided JSON file into Postman to access all available API requests for this project.
+
+# Sample Files 
+
+Sample CSV files are provided in the samples/ folder to test different import scenarios.
+
+The folder includes:
+
+valid_clients.csv – Contains valid client records for successful imports.
+
+duplicate_clients.csv – Contains client records with duplicates to test duplicate detection.
+
+invalid_clients.csv – Contains records with validation errors to test error handling.
+
+clients_test_duplicates_15000_with_1000_duplicates.csv – A large dataset containing 15,000 client records, including 1,000 duplicates, for testing performance and batch processing.
 
 # Possible Improvements
 
