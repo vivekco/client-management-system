@@ -126,6 +126,16 @@ DB_PASSWORD=
 
 QUEUE_CONNECTION=database
 
+## Create Database
+
+Before running migrations, create a MySQL database:
+
+Example using SQL:
+
+mysql -u root -p
+CREATE DATABASE client_manager;
+EXIT;
+
 ## Generate Application Key
 
 php artisan key:generate
