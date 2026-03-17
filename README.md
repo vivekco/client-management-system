@@ -97,7 +97,7 @@ Make sure the following are installed:
 ## Clone Repository
 
 git clone https://github.com/vivekco/client-management-system.git
-cd client-manager
+cd client-management-system
 
 ## Install Dependencies
 
